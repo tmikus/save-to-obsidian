@@ -55,7 +55,18 @@ export const ObsidianDialog = () => {
       aria-labelledby="modal-title"
       role="dialog"
       aria-modal="true"
-      style={{ zIndex: 999999999999999 }}
+      style={{
+        fontFamily: [
+          "ui-sans-serif",
+          "system-ui",
+          "sans-serif",
+          '"Apple Color Emoji"',
+          '"Segoe UI Emoji"',
+          '"Segoe UI Symbol"',
+          '"Noto Color Emoji"',
+        ].join(","),
+        zIndex: 999999999999999,
+      }}
     >
       <div
         className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"

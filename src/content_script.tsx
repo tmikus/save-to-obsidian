@@ -11,7 +11,6 @@ loadCss();
 
 root.render(
   <React.StrictMode>
-    <style>:host, :root &#123;font-size: 16px;&#125;</style>
     <ObsidianDialog />
   </React.StrictMode>
 );
