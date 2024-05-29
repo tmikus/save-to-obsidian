@@ -6,15 +6,27 @@ const Turndown = require("turndown").default;
 
 const VAULT_NAME_KEY = "vaultName";
 const NOTES_PATH_KEY = "notesPath";
+const TEMPLATE_KEY = "template";
 
 export const ObsidianDialog = () => {
-  const [vaultName, setVaultName] = useState(
-    localStorage.getItem(VAULT_NAME_KEY) || "Personal Vault"
-  );
-  const [notesPath, setNotesPath] = useState(
-    localStorage.getItem(NOTES_PATH_KEY) || ""
-  );
+  const [vaultName, setVaultName] = useState("Personal Vault");
+  const [notesPath, setNotesPath] = useState("");
+  const [template, setTemplate] = useState("");
   const [isVisible, setIsVisible] = useState(false);
+  useEffect(() => {
+    async function fetchSettings() {
+      const data = await chrome.storage.local.get([
+        VAULT_NAME_KEY,
+        NOTES_PATH_KEY,
+        TEMPLATE_KEY,
+      ]);
+      setVaultName(data[VAULT_NAME_KEY]);
+      setNotesPath(data[NOTES_PATH_KEY]);
+      setTemplate(data[TEMPLATE_KEY]);
+    }
+
+    fetchSettings();
+  }, [isVisible]);
   const closePopup = useCallback(() => {
     setIsVisible(false);
   }, [setIsVisible]);
@@ -25,13 +37,17 @@ export const ObsidianDialog = () => {
     const article = new Readability(documentClone as any).parse();
     const markdown = new Turndown().turndown(article!.content);
     const notePath = notesPath.trim() + "/" + article!.title;
-    const url = `obsidian://new?vault=${encodeURIComponent(
-      vaultName.trim()
-    )}&file=${encodeURIComponent(notePath)}&content=${encodeURIComponent(
-      markdown
-    )}`;
+    const args = {
+      vault: vaultName.trim(),
+      file: notePath,
+      content: evaluateTemplate(template) + markdown,
+    };
+    const urlArgs = Object.entries(args)
+      .map(([k, v]) => `${k}=${encodeURIComponent(v)}`)
+      .join("&");
+    const url = `obsidian://new?${urlArgs}`;
     window.open(url);
-  }, [closePopup, vaultName, notesPath]);
+  }, [closePopup, vaultName, notesPath, template]);
 
   const showPopup = useCallback(
     (message: any) => {
@@ -112,7 +128,9 @@ export const ObsidianDialog = () => {
                           value={vaultName}
                           onChange={(e) => {
                             const value = e.target.value;
-                            localStorage.setItem(VAULT_NAME_KEY, value);
+                            chrome.storage.local.set({
+                              [VAULT_NAME_KEY]: value,
+                            });
                             setVaultName(value);
                           }}
                         />
@@ -134,11 +152,36 @@ export const ObsidianDialog = () => {
                           value={notesPath}
                           onChange={(e) => {
                             const value = e.target.value;
-                            localStorage.setItem(NOTES_PATH_KEY, value);
+                            chrome.storage.local.set({
+                              [NOTES_PATH_KEY]: value,
+                            });
                             setNotesPath(value);
                           }}
                         />
                       </div>
+                    </div>
+
+                    <div className="mt-2">
+                      <label
+                        htmlFor="template"
+                        className="block text-sm font-medium leading-6 text-gray-900"
+                      >
+                        Template
+                      </label>
+                      <textarea
+                        id="template"
+                        rows={4}
+                        className="block w-full rounded-md border-0 py-1.5 pl-2.5 pr-2.5 text-gray-900 ring-1 ring-inset ring-gray-300 bg-white placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                        placeholder="Your note template goes here"
+                        value={template}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          chrome.storage.local.set({
+                            [TEMPLATE_KEY]: value,
+                          });
+                          setTemplate(value);
+                        }}
+                      ></textarea>
                     </div>
                   </div>
                 </div>
@@ -164,62 +207,22 @@ export const ObsidianDialog = () => {
       </form>
     </div>
   );
-  // return (
-  //   <div className="popup">
-  //     <form
-  //       onSubmit={async (e) => {
-  //         e.preventDefault();
-  //         await createNote();
-  //       }}
-  //     >
-  //       <h1>Save to Obsidian</h1>
-  //       <p>Please select where you'd like to save this page in Obsidian:</p>
-  //       <div className="input-container">
-  //         <label className="label" htmlFor="vault-name">
-  //           Vault name
-  //         </label>
-  //         <input
-  //           id="vault-name"
-  //           className="input"
-  //           onChange={(e) => {
-  //             const value = e.target.value;
-  //             localStorage.setItem(VAULT_NAME_KEY, value);
-  //             setVaultName(value);
-  //           }}
-  //           value={vaultName}
-  //           type="text"
-  //         />
-  //       </div>
-  //
-  //       <div className="input-container">
-  //         <label className="label" htmlFor="notes-path">
-  //           Notes path
-  //         </label>
-  //         <input
-  //           id="notes-path"
-  //           className="input"
-  //           onChange={(e) => {
-  //             const value = e.target.value;
-  //             localStorage.setItem(NOTES_PATH_KEY, value);
-  //             setNotesPath(value);
-  //           }}
-  //           value={notesPath}
-  //           type="text"
-  //         />
-  //       </div>
-  //
-  //       <button
-  //         onClick={closePopup}
-  //         className="button"
-  //         style={{ marginRight: "1em" }}
-  //         type="button"
-  //       >
-  //         Cancel
-  //       </button>
-  //       <button type="submit" className="button primary">
-  //         Save note
-  //       </button>
-  //     </form>
-  //   </div>
-  // );
 };
+
+function evaluateTemplate(template: string): string {
+  const now = new Date();
+  let year = new Intl.DateTimeFormat("en", { year: "numeric" }).format(now);
+  let month = new Intl.DateTimeFormat("en", { month: "2-digit" }).format(now);
+  let day = new Intl.DateTimeFormat("en", { day: "2-digit" }).format(now);
+  let hours = new Intl.DateTimeFormat("en", {
+    hour: "2-digit",
+    hourCycle: "h23",
+  }).format(now);
+  let minutes = new Intl.DateTimeFormat("en", { minute: "2-digit" }).format(
+    now
+  );
+  const formattedTemplate = template
+    .replace(/\{\{now}}/g, `${year}-${month}-${day} ${hours}:${minutes}`)
+    .replace(/\{\{url}}/g, window.location.toString());
+  return formattedTemplate.trim() + "\n";
+}
