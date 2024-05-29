@@ -7,34 +7,6 @@ const Turndown = require("turndown").default;
 const VAULT_NAME_KEY = "vaultName";
 const NOTES_PATH_KEY = "notesPath";
 
-const LABEL_STYLE: CSSProperties = {
-  color: "#000",
-  display: "block",
-  fontSize: "1em",
-};
-const INPUT_STYLE: CSSProperties = {
-  borderRadius: 6,
-  border: "1px solid #aaa",
-  boxSizing: "border-box",
-  padding: "0.5em",
-  fontSize: "1em",
-  width: "100%",
-};
-const INPUT_CONTAINER_STYLE: CSSProperties = {
-  marginBottom: "1em",
-};
-const BUTTON_STYLE: CSSProperties = {
-  fontSize: "1em",
-  padding: "0.7em",
-  /* border-radius: 6px; */
-  // /* border: 1px solid rgb(170, 170, 170); */
-  border: "1px solid #D2D5DB",
-  background: "#fafafa",
-  color: "rgb(17 24 39)",
-  borderRadius: 6,
-  fontWeight: 600,
-};
-
 export const ObsidianDialog = () => {
   const [vaultName, setVaultName] = useState(
     localStorage.getItem(VAULT_NAME_KEY) || "Personal Vault"
@@ -75,64 +47,22 @@ export const ObsidianDialog = () => {
   }, [showPopup]);
 
   return (
-    <div
-      style={{
-        display: isVisible ? "block" : "none",
-        position: "fixed",
-        right: 20,
-        top: 20,
-        background: "#fff",
-        borderColor: "#bbb",
-        borderStyle: "solid",
-        borderWidth: 1,
-        borderRadius: 10,
-        boxShadow: "#aaa 0 0 10px",
-        boxSizing: "border-box",
-        height: 400,
-        width: 400,
-        padding: 10,
-        zIndex: 999999999999999,
-        fontSize: 16,
-      }}
-    >
+    <div className="popup">
       <form
-        style={{
-          display: "block",
-        }}
         onSubmit={async (e) => {
           e.preventDefault();
           await createNote();
         }}
       >
-        <h1
-          style={{
-            color: "#000",
-            display: "block",
-            float: "none",
-            fontFamily: "Arial",
-            fontSize: "2em",
-          }}
-        >
-          Save to Obsidian
-        </h1>
-        <p
-          style={{
-            color: "#000",
-            display: "block",
-            float: "none",
-            fontFamily: "Arial",
-            fontSize: "1em",
-          }}
-        >
-          Please select where you'd like to save this page in Obsidian:
-        </p>
-        <div style={INPUT_CONTAINER_STYLE}>
-          <label htmlFor="vault-name" style={LABEL_STYLE}>
+        <h1>Save to Obsidian</h1>
+        <p>Please select where you'd like to save this page in Obsidian:</p>
+        <div className="input-container">
+          <label className="label" htmlFor="vault-name">
             Vault name
           </label>
           <input
             id="vault-name"
-            style={INPUT_STYLE}
+            className="input"
             onChange={(e) => {
               const value = e.target.value;
               localStorage.setItem(VAULT_NAME_KEY, value);
@@ -143,13 +73,13 @@ export const ObsidianDialog = () => {
           />
         </div>
 
-        <div style={INPUT_CONTAINER_STYLE}>
-          <label htmlFor="notes-path" style={LABEL_STYLE}>
+        <div className="input-container">
+          <label className="label" htmlFor="notes-path">
             Notes path
           </label>
           <input
             id="notes-path"
-            style={INPUT_STYLE}
+            className="input"
             onChange={(e) => {
               const value = e.target.value;
               localStorage.setItem(NOTES_PATH_KEY, value);
@@ -162,24 +92,13 @@ export const ObsidianDialog = () => {
 
         <button
           onClick={closePopup}
-          style={{
-            ...BUTTON_STYLE,
-            marginRight: "1em",
-          }}
+          className="button"
+          style={{ marginRight: "1em" }}
           type="button"
         >
           Cancel
         </button>
-        <button
-          type="submit"
-          style={{
-            ...BUTTON_STYLE,
-            background: "rgb(79 70 229)",
-            color: "#fff",
-            border: "0 none",
-            boxShadow: "inset 0 1px 0 0 #fff3",
-          }}
-        >
+        <button type="submit" className="button primary">
           Save note
         </button>
       </form>

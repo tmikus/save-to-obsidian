@@ -8,11 +8,20 @@ const shadowRoot = containerNode.attachShadow({ mode: "open" });
 const rootNode = document.createElement("div");
 shadowRoot.appendChild(rootNode);
 const root = createRoot(rootNode, {});
-const styleURL = chrome.runtime.getURL("style.css");
+
+loadCss();
 
 root.render(
   <React.StrictMode>
-    <link rel="stylesheet" href={styleURL} />
     <ObsidianDialog />
   </React.StrictMode>
 );
+
+async function loadCss() {
+  const styleUrl = chrome.runtime.getURL("style.css");
+  const styleResponse = await fetch(styleUrl);
+  const style = await styleResponse.text();
+  const styleSheet = new CSSStyleSheet();
+  styleSheet.replaceSync(style);
+  shadowRoot.adoptedStyleSheets.push(styleSheet);
+}
