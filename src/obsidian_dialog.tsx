@@ -8,8 +8,22 @@ const VAULT_NAME_KEY = "vaultName";
 const NOTES_PATH_KEY = "notesPath";
 const TEMPLATE_KEY = "template";
 
+const DEFAULT_VAULT_NAME = "Personal Vault";
+const DEFAULT_NOTES_PATH = ""
+const DEFAULT_TEMPLATE = `
+---
+created: {{now}}
+tags:
+  - link
+projects: 
+areas: 
+resources: 
+url: {{url}}
+---
+`.trim()
+
 export const ObsidianDialog = () => {
-  const [vaultName, setVaultName] = useState("Personal Vault");
+  const [vaultName, setVaultName] = useState("");
   const [notesPath, setNotesPath] = useState("");
   const [template, setTemplate] = useState("");
   const [isVisible, setIsVisible] = useState(false);
@@ -20,9 +34,21 @@ export const ObsidianDialog = () => {
         NOTES_PATH_KEY,
         TEMPLATE_KEY,
       ]);
-      setVaultName(data[VAULT_NAME_KEY]);
-      setNotesPath(data[NOTES_PATH_KEY]);
-      setTemplate(data[TEMPLATE_KEY]);
+      if (data[VAULT_NAME_KEY] == null) {
+        setVaultName(DEFAULT_VAULT_NAME);
+      } else {
+        setVaultName(data[VAULT_NAME_KEY]);
+      }
+      if (data[NOTES_PATH_KEY] == null) {
+        setNotesPath(DEFAULT_NOTES_PATH);
+      } else {
+        setNotesPath(data[NOTES_PATH_KEY]);
+      }
+      if (data[TEMPLATE_KEY] == null) {
+        setTemplate(DEFAULT_TEMPLATE);
+      } else {
+        setTemplate(data[TEMPLATE_KEY]);
+      }
     }
 
     fetchSettings();
@@ -94,6 +120,7 @@ export const ObsidianDialog = () => {
       <form
         className="fixed inset-0 z-10 w-screen overflow-y-auto"
         onSubmit={async (e) => {
+          e.stopPropagation();
           e.preventDefault();
           await createNote();
         }}
@@ -128,7 +155,11 @@ export const ObsidianDialog = () => {
                           className="block w-full rounded-md border-0 py-1.5 pl-2.5 pr-2.5 text-gray-900 ring-1 ring-inset ring-gray-300 bg-white placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                           placeholder="Name of your vault"
                           value={vaultName}
+                          onKeyDown={(e) => e.stopPropagation()}
+                          onKeyUp={(e) => e.stopPropagation()}
+                          onKeyPress={(e) => e.stopPropagation()}
                           onChange={(e) => {
+                            e.stopPropagation();
                             const value = e.target.value;
                             chrome.storage.local.set({
                               [VAULT_NAME_KEY]: value,
@@ -152,7 +183,11 @@ export const ObsidianDialog = () => {
                           className="block w-full rounded-md border-0 py-1.5 pl-2.5 pr-2.5 text-gray-900 ring-1 ring-inset ring-gray-300 bg-white placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                           placeholder="Full path to where you want to store notes"
                           value={notesPath}
+                          onKeyDown={(e) => e.stopPropagation()}
+                          onKeyUp={(e) => e.stopPropagation()}
+                          onKeyPress={(e) => e.stopPropagation()}
                           onChange={(e) => {
+                            e.stopPropagation();
                             const value = e.target.value;
                             chrome.storage.local.set({
                               [NOTES_PATH_KEY]: value,
@@ -176,7 +211,11 @@ export const ObsidianDialog = () => {
                         className="block w-full rounded-md border-0 py-1.5 pl-2.5 pr-2.5 text-gray-900 ring-1 ring-inset ring-gray-300 bg-white placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                         placeholder="Your note template goes here"
                         value={template}
+                        onKeyDown={(e) => e.stopPropagation()}
+                        onKeyUp={(e) => e.stopPropagation()}
+                        onKeyPress={(e) => e.stopPropagation()}
                         onChange={(e) => {
+                          e.stopPropagation();
                           const value = e.target.value;
                           chrome.storage.local.set({
                             [TEMPLATE_KEY]: value,
