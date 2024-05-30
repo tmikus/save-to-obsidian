@@ -2,6 +2,7 @@
   "manifest_version": 3,
   "name": "Save to Obsidian",
   "description": "Save the Web to Obsidian",
+  "author": "Tomasz Mikus",
   "version": "1.0",
   "content_scripts": [
     {

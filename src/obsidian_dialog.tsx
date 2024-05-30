@@ -1,6 +1,4 @@
 import { Readability } from "@mozilla/readability";
-import { format } from "prettier/standalone";
-import prettierMarkdown from "prettier/parser-markdown";
 import React, { useCallback, useEffect, useState } from "react";
 import { SHOW_POPUP } from "./actions";
 
@@ -39,15 +37,12 @@ export const ObsidianDialog = () => {
     const article = new Readability(documentClone as any).parse();
     const markdown = new Turndown({
       headingStyle: "atx",
-    }).turndown(article!.content);
+    }).turndown(article?.content);
     const notePath = notesPath.trim() + "/" + article!.title;
     const args = {
       vault: vaultName.trim(),
       file: notePath,
-      content: format(evaluateTemplate(template) + markdown, {
-        parser: "markdown",
-        plugins: [prettierMarkdown],
-      }),
+      content: evaluateTemplate(template) + markdown,
     };
     const urlArgs = Object.entries(args)
       .map(([k, v]) => `${k}=${encodeURIComponent(v)}`)
